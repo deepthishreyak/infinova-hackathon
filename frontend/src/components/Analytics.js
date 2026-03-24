@@ -9,7 +9,6 @@ function Analytics() {
   const [analytics, setAnalytics] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState('all');
 
   useEffect(() => {
     loadAnalytics();
