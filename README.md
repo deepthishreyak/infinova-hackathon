@@ -14,7 +14,7 @@ A cutting-edge decentralized finance (DeFi) platform for **tokenized invoice fin
 - **Atomic Transactions**: All-or-nothing execution preventing partial failures
 - **AI Risk Scoring**: Intelligent evaluation of invoice risk and interest rates
 - **Liquidity Pool**: Decentralized funding pool for investors
-- **Automated Settlement**: On-due-date settlement with interest calculation
+- **Automated Settlement**: On-due-date settlement with interest calculation`
 - **Wallet Integration**: Seamless Pera Wallet and AlgoSigner connectivity
 
 ### Advanced Features
@@ -214,7 +214,7 @@ The AI service evaluates invoices using:
 ## 🔒 Security Features6
 
 - ✅ Input validation on all endpoints
-- ✅ Address format verification
+- ✅ Address format verificationgit
 - ✅ Amount range checks
 - ✅ Atomic transaction guarantees
 - ✅ Wallet-based authentication
