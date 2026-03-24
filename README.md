@@ -211,7 +211,7 @@ The AI service evaluates invoices using:
 | Medium | 10% | 80% | 0.40 - 0.70 |
 | High | 20% | 60% | < 0.40 |
 
-## 🔒 Security Features
+## 🔒 Security Features6
 
 - ✅ Input validation on all endpoints
 - ✅ Address format verification
