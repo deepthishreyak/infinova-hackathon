@@ -1,10 +1,6 @@
 {
   "buildCommand": "npm install && npm run build",
   "outputDirectory": "build",
-  "env": {
-    "REACT_APP_BACKEND_URL": "@backend_url",
-    "REACT_APP_NETWORK": "testnet"
-  },
   "rewrites": [
     {
       "source": "/(.*)",
