@@ -1,0 +1,9 @@
+{
+  "name": "invoice-financing-dapp",
+  "version": "1.0.0",
+  "description": "Full-stack decentralized invoice financing application",
+  "scripts": {
+    "setup": "bash scripts/setup.sh",
+    "demo": "bash scripts/run-demo.sh"
+  }
+}

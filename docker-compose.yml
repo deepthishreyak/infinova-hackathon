@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (optional, for production)
+  # db:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_PASSWORD: invoiceflow
+  #     POSTGRES_DB: invoiceflow
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+  # Redis Cache (optional, for production)
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+
+  # AI Risk Scoring Service
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_LEVEL=info
+    volumes:
+      - ./ai-service:/app
+    command: python main.py
+
+  # Backend API Server
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - ALGOD_TOKEN=a
+      - ALGOD_SERVER=http://host.docker.internal
+      - ALGOD_PORT=4001
+    depends_on:
+      - ai-service
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm start
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001
+      - REACT_APP_NETWORK=testnet
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: invoiceflow-network
