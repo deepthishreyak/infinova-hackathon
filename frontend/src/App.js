@@ -4,16 +4,20 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
 import SupplierPanel from './components/SupplierPanel';
 import InvestorPanel from './components/InvestorPanel';
 import Analytics from './components/Analytics';
 import WalletConnect from './components/WalletConnect';
+import { auth, signInWithGoogle, signOutUser } from './firebase';
 import './index.css';
 
 function App() {
   const [activeTab, setActiveTab] = useState('supplier');
   const [walletConnected, setWalletConnected] = useState(false);
   const [userAddress, setUserAddress] = useState('');
+  const [firebaseUser, setFirebaseUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -34,6 +38,15 @@ function App() {
     checkWallet();
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const handleWalletConnect = (address) => {
     setUserAddress(address);
     setWalletConnected(true);
@@ -46,6 +59,29 @@ function App() {
     setUserAddress('');
     localStorage.removeItem('walletConnected');
     localStorage.removeItem('userAddress');
+  };
+
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      await signInWithGoogle();
+    } catch (error) {
+      console.error('Firebase login failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+      await signOutUser();
+      handleWalletDisconnect();
+    } catch (error) {
+      console.error('Firebase logout failed:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -67,7 +103,24 @@ function App() {
 
             {/* Wallet Connection Status */}
             <div className="flex items-center space-x-4">
-              {walletConnected ? (
+              {!authLoading && !firebaseUser ? (
+                <button
+                  onClick={handleLogin}
+                  className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/40 rounded-lg text-sm text-blue-200 transition-colors"
+                >
+                  Login with Google
+                </button>
+              ) : null}
+
+              {!authLoading && firebaseUser && (
+                <div className="px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                  <p className="text-sm text-blue-200">
+                    {firebaseUser.displayName || firebaseUser.email || 'Logged in'}
+                  </p>
+                </div>
+              )}
+
+              {walletConnected && firebaseUser ? (
                 <div className="flex items-center space-x-3">
                   <div className="px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-lg">
                     <p className="text-sm text-green-400 font-mono">
@@ -78,11 +131,17 @@ function App() {
                     onClick={handleWalletDisconnect}
                     className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg text-sm text-red-400 transition-colors"
                   >
-                    Disconnect
+                    Disconnect Wallet
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 bg-gray-500/10 hover:bg-gray-500/20 border border-gray-500/30 rounded-lg text-sm text-gray-300 transition-colors"
+                  >
+                    Logout
                   </button>
                 </div>
               ) : (
-                <WalletConnect onConnect={handleWalletConnect} />
+                firebaseUser && <WalletConnect onConnect={handleWalletConnect} />
               )}
             </div>
           </div>
@@ -112,7 +171,18 @@ function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        {!walletConnected && (
+        {!firebaseUser && (
+          <div className="mb-8 p-6 bg-yellow-500/5 border border-yellow-500/30 rounded-lg">
+            <h2 className="text-lg font-semibold text-yellow-300 mb-2">
+              🔐 Login Required
+            </h2>
+            <p className="text-gray-300">
+              Login with Google to continue, then connect your Algorand wallet.
+            </p>
+          </div>
+        )}
+
+        {firebaseUser && !walletConnected && (
           <div className="mb-8 p-6 bg-blue-500/5 border border-blue-500/30 rounded-lg">
             <h2 className="text-lg font-semibold text-blue-300 mb-2">
               🔗 Connect Your Wallet
@@ -125,9 +195,9 @@ function App() {
 
         {/* Tab Content */}
         <div className={`transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
-          {activeTab === 'supplier' && <SupplierPanel userAddress={userAddress} />}
-          {activeTab === 'investor' && <InvestorPanel userAddress={userAddress} />}
-          {activeTab === 'analytics' && <Analytics />}
+          {firebaseUser && activeTab === 'supplier' && <SupplierPanel userAddress={userAddress} />}
+          {firebaseUser && activeTab === 'investor' && <InvestorPanel userAddress={userAddress} />}
+          {firebaseUser && activeTab === 'analytics' && <Analytics />}
         </div>
       </main>
 
