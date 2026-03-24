@@ -343,8 +343,3 @@ function Analytics() {
 }
 
 export default Analytics;
-    </div>
-  );
-}
-
-export default Analytics;
