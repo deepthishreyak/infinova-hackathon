@@ -23,6 +23,7 @@ function InvestorPanel({ userAddress }) {
       loadInvoices();
       loadPoolBalance();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userAddress]);
 
   const loadInvoices = async () => {
